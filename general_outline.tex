@@ -1,0 +1,441 @@
+\documentclass[12pt]{article}
+
+\usepackage{template/bu_ece_report}
+\usepackage{layout}
+\usepackage[utf8]{inputenc}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}  % For code coloring
+
+\usepackage{url} % For bibtex
+\Urlmuskip=0mu plus 1mu
+
+% To get double quotes working correctly
+\usepackage [english]{babel}
+\usepackage [autostyle, english = american]{csquotes}
+\MakeOuterQuote{"}
+
+% Include for inconsolata, having trouble with unicode problems
+% \usepackage{fonts/inconsolata/tex/inconsolata}
+
+% Code Coloring
+\tcbset{
+    frame code={}
+    center title,
+    left=0pt,
+    right=0pt,
+    top=0pt,
+    bottom=0pt,
+    colback=gray!70,
+    colframe=white,
+    width=\dimexpr\textwidth\relax,
+    enlarge left by=0mm,
+    boxsep=5pt,
+    arc=0pt,outer arc=0pt,
+    }
+
+% Custom commands
+% \newcommand{\code}[1]{\lstinline{\begin{tcolorbox}#1\end{tcolorbox}}}
+\newcommand{\code}[1]{\lstinline[]{#1}}
+\newcommand{\codeRef}[1]{\textbf{Listing \ref{#1}}}
+
+% Colors
+\definecolor{commentGreen}{rgb}{0.026,0.112,0.095}
+
+% Other options
+% escapeinside={},                   % if you want to add LaTeX within your code
+
+\lstset{
+    frameround=fttt,
+    breaklines=true,
+    keywordstyle=\color{blue}\bfseries,
+    basicstyle=\ttfamily\color{black}\bfseries,
+    numberstyle=\color{black}
+    breakatwhitespace=false,           % sets if automatic breaks should only happen at whitespace
+    captionpos=b,                      % sets the caption-position to bottom
+    numbers=left,                      % where to put the line-numbers; possible values are (none, left, right)
+    numbersep=5pt,                     % how far the line-numbers are from the code
+    stepnumber=2,                      % the step between two line-numbers. If it's 1, each line will be numbered
+    numberstyle=\tiny\color{gray},     % the style that is used for the line-numbers
+    tabsize=2,                         % sets default tabsize to 2 spaces
+    rulecolor=\color{black},           % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+    backgroundcolor=\color{white},     % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+    breaklines=true,                   % sets automatic line breaking
+    keepspaces=true,                   % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+    showspaces=false,                  % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+    showstringspaces=false,            % underline spaces within strings only
+    showtabs=false,                    % show tabs within strings adding particular underscores
+}
+
+\lstdefinestyle{customC}{            %
+    frame=single,                      % adds a frame around the code
+    basicstyle=\ttfamily\scriptsize,            % the size of the fonts that are used for the code
+    language=c,                        % the language of the code
+    commentstyle=\color{commentGreen}, % comment style
+    keywordstyle=\color{blue},         % keyword style
+    stringstyle=\color{red},           % string literal style
+    aboveskip=20pt,
+    belowskip=20pt,
+}
+
+\lstdefinestyle{customErlang}{         %
+    frame=single,                      % adds a frame around the code
+    basicstyle=\ttfamily\scriptsize,   % the size of the fonts that are used for the code
+    language=Erlang,                   % the language of the code
+    commentstyle=\color{commentGreen}, % comment style
+    keywordstyle=\color{blue},         % keyword style
+    stringstyle=\color{red},           % string literal style
+    aboveskip=20pt,
+    belowskip=20pt,
+}
+
+\usepackage{template/listings-golang/listings-golang}
+\lstdefinestyle{customGo}{         %
+    frame=single,                      % adds a frame around the code
+    basicstyle=\ttfamily\scriptsize,   % the size of the fonts that are used for the code
+    language=Golang,                   % the language of the code
+    commentstyle=\color{commentGreen}, % comment style
+    keywordstyle=\color{blue},         % keyword style
+    stringstyle=\color{red},           % string literal style
+    aboveskip=20pt,
+    belowskip=20pt,
+}
+
+\lstdefinestyle{customChpl}{            %
+    frame=single,                      % adds a frame around the code
+    basicstyle=\ttfamily\scriptsize,            % the size of the fonts that are used for the code
+%    language=c,                        % the language of the code
+    commentstyle=\color{commentGreen}, % comment style
+    keywordstyle=\color{blue},         % keyword style
+    stringstyle=\color{red},           % string literal style
+    aboveskip=20pt,
+    belowskip=20pt,
+}
+
+\begin{document}
+
+% This will prevent long words from running off the edge of the page, if I want it
+% \sloppy
+
+% This will print out the current layout of the page, with very nice description
+% \layout
+
+\buecedefinitions%
+    {Parallelism \& Concurrency Strategies within Programming Languages}
+    {Engineering 325 Research Paper}
+    {Timothy DeVries}
+    {November 30, 2015}
+    {2015-2}
+
+\buecereporttitlepage
+
+\tableofcontents
+
+\newpage
+
+\section{Abstract}
+
+Nearly all computers made today have at least two cores. This means that nearly every standalone system today has the ability to execute code simultaneously. Even more so, with the advent of the internet and fast communication topologies, distributed systems of computing are becoming more common. Parallelism is not natural to many languages, at least in their original form, because it is not always deterministic, sequential or purely algorithmic. Languages such as Golang, Chapel and Erlang have attempted to solve that problem. There are also frameworks such as MPI and OpenMP that have been created that add on to original programming languages, such as C, and allow for concurrency and parallelism to be implemented. 
+
+These different structures each have strengths, weaknesses and ideal implementations. As with sequential programming, patterns are being developed for parallel programming that will allow developers to create code more easily. Ultimately, these strategies deserve study and reflection as parallelism appears to be the future of computing.
+
+\newpage
+
+\section{Introduction}
+
+The vast majority of processors shipped by Intel today are multi-core. This trend has been happening for over a decade. In 2007, "more than 70 percent of all server, desktop and mobile processors that Intel ships [were] multicore" \cite{multicore_usage}. This means that nearly all of modern computing entities have the ability to perform some form of parallelism or concurrency
+\footnote{ Please refer to the appendix for a discussion concerning concurrency vs. parallelism. }.
+
+With so many devices now able to perform multiple operations at once, parallelization and its structure is becoming important in many different area of development, from web service handling to operating system multi-tasking. In this report, several broad strategies will be discussed, with implementations shown both for a sequential version of the program and a parallel or concurrent version.
+
+\section{Strategies within Programming Languages}
+
+\subsection{General Strategy Outline}
+
+Each subsection will contain the following sections, which are shown with example topics:
+
+\paragraph{General Description of Parallelism Strategy}
+
+The background of each language will be discussed, including reasons  for being created and problems hoped to address. Where applicable, the effectiveness of the language when attempting to solve the problems will be discussed.
+
+\paragraph{Basic Example Using the Parallelism Strategy}
+
+For each parallelism strategy, or sub-strategy, example code will be provided. Each set of  code will address the same algorithm, regardless of the implementation. The algorithm that will be implemented in each language is summing the numbers from 0 to N and printing the result.
+For each implementation, a sequential example of the algorithm will be shown. This will be done so that one can see the transition from a simple sequential algorithm to a simple parallel or concurrent algorithm.
+After the sequential example has been shown, a basic parallel or concurrent algorithm will be constructed. The strengths and weaknesses of this implementation will be discussed, along with scalability of the language, either through size of the problem, number of processes.
+
+\paragraph{Unique Characteristics \& Hardware Implementations}
+
+The discussion of the scalability of the solution will lead naturally into its unique characteristics and optimal hardware implementation. Items to be discussed will include multi-core vs. many-core (i.e. an 8-core notebook process vs. a GPU with 1024 cores), memory access by thread of execution and memory location.
+
+\subsection{Multi-process}
+Multi-processed implementations of concurrency are based on creating separate threads of execution. In this implementation, these threads of execution are called processes. Processes have no shared memory between other processes.
+
+The absence of shared memory is an advantage in some cases. For example, when passing a reference during the creation of Process A, if that variable is changed in the host process, the child process will read the changed result, rather than the original result. This will be discussed further in the Multi-threaded section.
+However, the lack of shared memory can also be a disadvantage. Complex systems of sharing information between processes can result in a slow of the process, along with redundancy of data or instructions.
+
+Multi-process implementations are often useful for distributed systems because they do not assume the use of shared memory. However, they are able to be used in shared memory by allocating additional memory for each new process.
+
+\subsubsection{C with MPI}
+A common example of the Multi-process implementation of parallelism is C with a Message Passing Interface Library.
+
+The Message Passing Interface (MPI) library is an implementation for parallelism that was adopted by many academic and industry partners. It is mainly used for parallelism, not concurrency. Each object has its own stack, heap, etc. Information must be passed to these objects. They do not inherit from "parent threads" or any other such object, which distinguishes the library from POSIX pthreads. It has implementations in several different languages.
+\cite{mpi_intro}
+
+MPI is used so often in the multi-processing context that is often included with the standard Linux installations. It contains its own compiler and execution helper. The sequential and parallel implementations are shown in the following two sections.
+
+\paragraph{Sequential C Code}
+
+The implementation of the C code is very straightforward. It mainly revolves around the lines of code seen in \codeRef{cSeqSumSnip} and does not require any of the functionality that MPI provides.
+
+\lstinputlisting[language=C, style=customC, firstline=24, lastline=31]{./code_example/c_mpi/sequential_sum.c}
+\lstinputlisting[language=C, style=customC, caption="A Sequential Sum in C", label=cSeqSumSnip, firstline=46, lastline=46]{./code_example/c_mpi/sequential_sum.c}
+
+The algorithm above is sequential, and therefore the first process must iterate from zero to the maximum given in command line.
+
+\paragraph{Parallel C Code}
+
+There are two main sections used to convert the previous sequential C program to a parallel implementation. The first is initializing MPI and its processes. This can be seen in the first half of \codeRef{cParSumSnipMPI}. The MPI processes are created at runtime by the call to \code{mpirun}.
+An example call would be \code{mpirun \-np 2 ./parallel_sum 10},
+where \code{-np 2} represents the number of processors being set equal to two and \code{./parallel_sum 10} represents which binary to execute with its own command line arguments.
+
+Because MPI creates separate processes, each must find its information by "asking" for it. By making the three queries in \codeRef{cParSumSnipMPI}, it finds out any pertinent command line arguments, how many other processes are executing simultaneously, and which process it is. Once it knows this information, the process knows all it needs to know to calculate its share of the sum.
+
+This algorithm uses a \textit{Reduction} pattern to combine the results from multiple processes back to the host process. This is necessary because they processes do not share memory, and therefore cannot modify some shared global variable or address.
+
+% (45, 48), (56, 64)
+\lstinputlisting[language=C, style=customC, firstline=45, lastline=48]{./code_example/c_mpi/parallel_sum.c}
+\lstinputlisting[language=C, style=customC, firstline=56, lastline=64, caption="A Parallel Sum in C with MPI", label=cParSumSnipMPI]{./code_example/c_mpi/parallel_sum.c}
+
+The results of the two programs are shown below in \codeRef{cMPIRes}
+
+\lstinputlisting[basicstyle=\scriptsize\ttfamily, caption="Results for C with MPI", captionpos=b, label=cMPIRes]{./code_example/c_mpi/result.txt}
+
+The MPI library provides a standard way of creating processes. This abstraction provides the user with the ability to create a system that will work on both distributed and shared systems. This is because the structure of MPI does not rely on shared memory. This allows MPI to scale across multiple processing units without any change in the code. It will even run on the same binary.
+
+However, the drawback, as with other multi-process structures is the need to copy any information that is in the stack or heap over to each process. This can be mitigated by only reading the data on a per-process level after initialization of the MPI processes. It functions well on a wide range of processing units, which can be changed at run time.
+
+\subsection{Actor Model}
+
+\begin{comment}
+--------------------------------------------------------------------------------
+Basic Background and Goals:
+
+\begin{itemize}
+    \item Actor model meant to address the problem that "Today's algorithmic programming languages were designed to express deterministic sequential algorithms".
+    \item "The actor model emphasizes the communication occuring during computation" (17)
+    \item "For the actor model... message pasing resembles mail service, so that messages may always be sent but are subject to variable delays en route to their destinations."
+    \begin{itemize}
+        \item This allows the actor model to be flexible. It can analyze distributed computer networks \textit{as well as} multiprocessors and programs.
+    \end{itemize}
+\end{itemize}
+How communication is accomplished:
+\begin{itemize}
+    \item Each communication is described as a \textit{message} arriving at a computation agent, called an \textit{actor}. (17)
+    \begin{itemize}
+        \item Examples of actors include: memory chips, subprograms and entire computers (17)
+    \end{itemize}
+    \item Every communication between actors is consider an \textit{event}. Note that the actor model only refers to the receiving of a communication as an event. All events are receiving events, there are no sending events. (17).
+\end{itemize}
+--------------------------------------------------------------------------------
+\end{comment}
+
+The actor model is a subset of the multi-process strategy, at least by the definition stated above. It falls into this category because the processing units do not use shared memory. In the actor model, an \textit{Actor} is the "computational agent". This could be nearly any form of computational object, including memory chips, subprograms, or even entire computers. Whenever an actor communicates with another actor, it is called an \textit{event}. However, this communication only refers to the act of receiving an event. All events are consider receiving events, there are no sending events.
+
+The actor model was created to address the problem that "today's algorithmic programming languages were designed to express deterministic sequential algorithms".
+Due to this consideration at creation, the Actor model has several unique emphasises and patterns in its implementation.
+It primarily emphasises the use of communication that occurs while the computation is ongoing. This communication is similar to a "mail service". In the actor model's mail service, in that the message (or the mail) is always sent, but there is a variable amount of time until that message is received (or the mailbox is opened).
+\cite{actor_intro}
+
+It has many of the same characteristics of the general multi-process strategy, except that it often takes care of "little details" that are forgotten in generic multi-processing. It will remove the need for locks and semaphores in many situations, and provides optimal "under-the-hood" solutions to these problems.
+
+\subsubsection{Erlang}
+
+Erlang is a functional language developed to be used in the actor model. In Erlang's implementation, creating concurrency is very simple and is comparatively safe to some of the other methods discussed in this report. To create a new agent, one can simply call \code{spawn(module, function, listOfArgs)}, where the module is the location of the function that is to be called with the list of arguments. When this is a called, a new agent of execution is spawned as a process. It is called a process because it shares no data with the other threads of execution. Due to the lack of shared memory, it must use some sort of message passing to communicate with other processes. Erlang has a built-in message passing structure.
+
+The messaging structure for Erlang has built-in fault tolerance. If an agent receives a message, it appends that message to a queue. Once reached in the queue, if it cannot be handled, it is left in the queue and the next item in the queue is handled. This relieves the programmer of the necessity of making many different types of locks and makes it so that locks do not have to handle when a connection is lost, or some other real-world problem that occurs during communication (particularly between distributed systems). To send a message in Erlang and take advantage of the built-in structure, one uses the following pattern of \code{pid ! message}.
+
+As mentioned above, once an actor has received a message, it places it in a queue and must be handled \cite{erlang_intro}.
+
+\begin{lstlisting}[language=Erlang, caption="Erlang Receive Pattern", label=erlangRPat, captionpos=b, numbers=none ]
+    receive
+        pattern1 ->
+            actions1;
+        pattern2 ->
+            actions2;
+        ...
+        patternN ->
+            actionsN
+    end.
+\end{lstlisting}
+
+The pattern shown in \codeRef{erlangRPat} will be used in the concurrent Erlang Example to pass messages between the different actors.
+
+\paragraph{Sequential Erlang Example}
+
+As mentioned above, Erlang is a functional programming language. As such, it does not have for loops. To simulate for loops, one must write a recursive function that does the work of the for loop. In \codeRef{erlangSumSeqSnip}, we can see that function is called \code{find_sum} and it takes two arguments, \code{N}, which is the count of the numbers we will be summing over, and \code{Min}, which is the number at which the program will start summing. When the minimum is reached, it sums all of the numbers through the recursive calls and gives the sum.
+
+\lstinputlisting[style=customErlang, firstline=4, caption="Sequential Sum in Erlang", label=erlangSumSeqSnip]{./code_example/erlang/sequential_sum.erl}
+
+This sequential code does have a particularly unique feature:  it does not use common programming constructs, such as a loop, that were relied on for the C code. This is why there is a recursive call in the place of the for loop that was seen in the similar C code.
+
+\paragraph{Concurrent Erlang Example}
+
+The concurrent implementation for Erlang is significantly more complex. As discussed above, there is no way to create loops except through recursion, so several helper functions must be made to keep track of how far down the recursion tree the program is at any time. Also, because actors do not have shared memory, all information must be passed between the actors and then eventually the main actor to compile the results. In the implementation shown in \codeRef{erlangSumParSnip}, a Master-Worker approach is used.
+
+The Master-Worker approach is where one thread of execution, the master, sends "jobs" to many other threads of execution. These jobs could have the same instructions with different data, different instructions with the same data, or some combination of those two options. 
+
+In the current example, the master spawns a master thread object that can receive the results from the sub-sums of the workers. It then spawns the children. Normally at this point, a for loop would be in order to spawn as many threads as the expect number of processors. However, a helper function was created to spawn the threads recursively until it "ran out" of threads to spawn. After all the threads have been spawned, the master receiver waits until it has received the specified number of threads. Upon receiving the last thread, it prints out the final result.
+
+\lstinputlisting[style=customErlang, firstline=4, caption="Concurrent Sum in Erlang", label=erlangSumParSnip]{./code_example/erlang/concurrent_sum.erl}
+
+While this implementation is perhaps more difficult to understand than the C implementation above, it does provide inherent safety knowing that the actor will always receive the message and never have a race condition while writing.
+
+The total line count grew from around 16 to approximately 60 to move from the sequential to parallel implementations of this algorithm. It also required significantly more design work, considering how to implement multiple recursive function calls and to return values at the correct time. However, this method gives the user very fine control over what each process would do, and is very safe compared to many other languages. There was no need to create a lock on the master receiver, which would be necessary if the user was using the standard POSIX thread library. This is because, as mentioned previously, every message is sent to the actor, but there is variable time until that actor "opens up the mail." 
+
+This becomes much more powerful in situations where communication is not as guaranteed as on one computer between processes on the same operating system. Imagine a website handling thousands of connections, which sometimes may fail or drop. If one of those connections previously held the lock for a key resource, and failed while holding the lock, it would be very difficult to retrieve that lock naturally. In the Actor model, there is no lock, and the master would just continue on down the queue of requests.
+
+\subsection{Multi-threaded}
+
+Multi-threaded languages use a parent and child relationship for the threads they create. A child will inherit all the information from a parent, and then have its own stack. This leads to several problems with non-deterministic results if information is stored or modified in the parent. However, it also allows for much less wasted memory and time copying over information from the parent's stack to the child's stack. Many threading libraries are based on the POSIX thread (pthread) standard. 
+
+\subsubsection{Golang}
+
+Golang was originally developed in 2007 at Google. One of the cornerstones of the language was to support multiprocessing inherently and idiomatically. It does this primarily through goroutines. Goroutines are very easy to construct in golang. These goroutines spawn new psuedo-threads. They receive values from upstream via inbound channels and then perform some function on this data, then send values downstream via outbound channels. This is an example of pipelining in Go \cite{effective_go}.
+
+However, goroutines are not exactly threads. They are, in short, a "function executing concurrently with other goroutines in the same address space". This is why they are often called threads, because of the shared memory with the host. Goroutines have several advantages, including being lightweight and handling their own stack and heap allocation and freeing \cite{effective_go}. They are lighter than threads, as they are multiplexed onto OS threads as required \cite{conc_not_par}.
+Not only are goroutines very lightweight in terms of hardware usage, they are also very easy to use in development. To add the concurrency, prefix the instruction with \code{go}. In otherwords, if the command was \code{functionCall(arg1, arg2)} then the new command would be \code{go functionCall(arg1, arg2)}.
+
+Even so, Golang offers a more powerful tool for adding concurrency, which is a channel. Unlike goroutines, channels are able to signal completion. Channels can even be used in essentially sequential code to act as a return for a function. 
+
+\paragraph{Sequential Golang Example} 
+
+In \codeRef{goSeqSumSnip}, the sequential implementation uses a channel that was created to pass return values back to the main function. Once a thread is created, and runs the function to \code{sum_range} function, that function will then pass the return value to the channel, which in turn passes it to the sum variable.
+
+\lstinputlisting[style=customGo, firstline=33, lastline=35, caption="Sequential Sum in Go", label=goSeqSumSnip]{./code_example/go/golang.go}
+
+The sequential algorithm follows very closely with the C implementation.
+
+\paragraph{Concurrent Golang Example}
+
+However, channels begin to truly shine when concurrency is initiated in the program. Because one can wait for a specific channel at any time, it is possible to send off several goroutines one after another, and then wait for the results as necessary. In a practical application, this could look like sorting a list that was read from memory in a separate thread while the main thread continues to ask for more input. Then, right before the list is needed, the program can wait as necessary, but did not waste the time earlier sorting the list, but allowed a worker thread to do so.
+
+In the current example, two threads are spawned with two channels listening for their output. Once they are both complete, the sum is then printed. This can be seen in \codeRef{goParSumSnip}. 
+
+\lstinputlisting[style=customGo, firstline=44, lastline=51, caption="Concurrent Sum in Go", label=goParSumSnip]{./code_example/go/golang.go}
+
+Golang provides a truly elegant way of providing concurrency to the program. It is considered concurrency because the goroutines can be executing any type of function -- they are not required to perform the same action or instruction. Also, any function can be made into a concurrent call with the addition of the keyword \code{go} and can be assured to be complete using channels. Channels can act as locks, return functions and more. Yet, even with these more advanced tools, the problems with multi-threading still exist. Using channels or or goroutines, one is able to cause significant problems with the shared memory of channels if all race conditions are not handled. 
+
+\subsection{OpenMP}
+
+OpenMP is an open source pragma-based framework. This is the slowest of the popular parallelization or concurrent frameworks, but also one of the simplest to develop in \cite{openmp_intro}. Pragmas are definitions inserted into code that will alert the compiler to do something different if the right libraries are included. Recall the sequential sum method in C shown in \codeRef{cSeqSumSnip}. To parallelize this using OpenMP, simply add \code{#pragma omp parallel for}, which lets the compiler know that this should be parallelized. An example of this is shown in \codeRef{ompParallelFor}.
+
+\lstinputlisting[style=customC, firstline=28, lastline=31, caption="Example of Pragma Based For Loop", label=ompParallelFor]{./code_example/c_omp/parallel_sum.c}
+
+This is why OpenMP is  considered one of the easiest frameworks to begin implementing parallel execution in a program. It is very powerful when dealing with legacy code that does not take advantage of multi-core processors at all and can be added with very little extra work. OpenMP has many different pragmas that can be used to create different types of parallelization. It can use reduction patterns, similar to what was seen in the MPI example above. There are several tools that will allow developers to analyze how long a program stays in a certain location, and OpenMP is often used in conjunction with them to provide large speed ups with little development effort.
+
+However, this ease of use comes at a cost. There is often a 15 to 20 percent loss of performance compared to structures actually created in something like MPI. 
+
+\subsection{Partitioned Global Address Space (PGAS)}
+PGAS are used for single program, multiple data programming. These programs have shared variables for  communication instead of using message passing \cite{gpas_intro}. This is why they are often associated with multi-threaded applications, as threads of execution will have shared memory, or at least the illusion of shared memory.
+
+\subsubsection{Chapel}
+Chapel is a language that was designed to once again combat the idea that many modern languages were constructed to solve deterministic, sequential algorithms. It's primary goal was to fix the problem that "the population of users who can effectively program parallel machines comprises only a small fraction of those who can effectively program traditional sequential computers, and this gap seems only to be widening as time passes" \cite{chapel_sage}. The language was originally developed and is still maintained by Cray Inc., a modern supercomputer manufacturer \cite{chapel_cray}. However, the language is open source and portable to non-Cray machines.
+
+Chapel has four main goals that drive its ideology. The first is "General Parallelism". This means that the creators of the language want to provide the user with the ability to execute any parallel algorithm on any type of parallel hardware. The rest are  "Separation of Parallelism and Locality, Multiresolution Design and Productivity Features" \cite{chapel_cray}.
+
+\paragraph{Sequential Chapel Example}
+
+Chapel has the feeling of many other popular languages today. As can be seen in the sequential implementation shown in \codeRef{chplSeqSumSnip}, 
+
+\lstinputlisting[style=customChpl, caption="Example of Chapel Sequential Sum", label=chplSeqSumSnip]{./code_example/chpl/sequential_sum.chpl}
+
+This once again follows very closely to the implementation for the sequential sum in C.
+
+\paragraph{Parallel Chapel Example}
+
+Once again, a reduction pattern will be used in this example. Chapel provides a very simple interface for several different kinds of common parallel patterns. To invoke a parallel pattern in Chapel, insert the following template: \newline \code{<operator> <pattern_name> ( <objects_to_iterate_over> )} \newline This can be seen in line 27 of \codeRef{chplParSumSnip}.
+
+\lstinputlisting[style=customChpl, caption="Example of Chapel Parallel Sum", label=chplParSumSnip]{./code_example/chpl/parallel_sum.chpl}
+
+Chapel's interface is very easy to use for many of the common parallel strategies. It does a good job of handling the shared memory between agents, allowing for efficient handling of large amounts of data simultaneously.
+
+\section{Other Interesting Strategies}
+
+This section includes information that was throughout the research phase of this paper, that while interesting, was not feasible to include in this document.
+
+\subsection{CUDA}
+
+A proprietary, but free, implementation of parallelism that uses General Purpose Graphics Processing Units (GPGPUs) to perform - in general - vector problems. This is an example of a language that is primarily strongest with a Single Instruction, Multiple Data (SIMD) approach. It can only be used with Nvidia GPUs, not with standard CPU cores or other GPUs (for example AMD). This allows a program to take advantage of the large amount of processing units in a GPU, sometimes more than 1024 cores in one GPU. It often uses vector processing \cite{cuda}.
+
+\subsection{OpenCL}
+
+An open-source alternative to CUDA. It can use any core on a CPU, not just a "CUDA-Core". However, because it is so generic, it is often much harder to configure and optimize. Because of this, it often suffers a 15-20\% reduction in performance when compared to CUDA.
+
+\section{Conclusion}
+
+This report has found that there are many different implementations for parallelism and there is no "one-size-fits-all" approach. Just as in sequential programming, the need to balance rapid development and prototyping with speed often occurs. For example, in sequential programming one might want to use Python to create a system, but because of the amount of calculations, C might be a more viable choice. Similarly, in parallel programming one might want to use OpenMP to parallelize the system because of the short development time, but might need the extra speed that MPI can offer.
+
+Not only are time considerations important, but hardware implementations play a key role in choosing a strategy. If the system will be distributed, then perhaps Erlang with its natural safeguards against dropped messages, out-of-order receiving, and pre-made actors might be the best choice. Or if the system will used shared memory, and the main program has already read in a large amount of data, then perhaps a multi-threaded approach might be best so that the data would not need to be copied for each thread.
+
+In practice, time for consideration must be made before deciding on a language, implementation and pattern before development begins. However, it is not only important to spend time considering the options, but they must be well known to the user. I felt that I learned a lot from doing this research paper and I hope that I am able to make more educated decisions about parallelism in the future because of it.
+
+\newpage
+
+\section{Appendix}
+
+\subsection{Concurrency vs. Parallelism}
+
+Because there is a common misconception that concurrency and parallelism are synonymous, both terms will be defined here and used accordingly throughout the paper. Concurrency is "programming as the composition of independently executing processes," while parallelism is "the simultaneous execution of (possibly related) computations" \cite{conc_not_par}.
+
+To elaborate, concurrency is about \textit{handling} lots of different things at one time, while parallelism is about \textit{doing} lots of things at once. In general, this means that concurrency is about the structure of a solution, language or abstraction while parallelism is about the actual execution of the solution. \\
+
+\subsection{Code Implementations}
+
+All code in the following sections was written by the author of this report, T.J. DeVries.
+
+The results of all the implementations are shown below. Erlang was having a problem with big numbers, so it just runs 1,000,000.
+
+\lstinputlisting[basicstyle=\footnotesize\ttfamily, caption="Final Results", label=finalResults]{./code_example/final_results.txt}
+
+\subsubsection{C Implementations}
+
+\lstinputlisting[language=C, style=customC, caption="A Sequential Sum in C with MPI", label=cSeqSum]{./code_example/c_mpi/sequential_sum.c}
+\lstinputlisting[language=C, style=customC, caption="A Parallel Sum with MPI", label=cParSum]{./code_example/c_mpi/parallel_sum.c}
+
+\lstinputlisting[language=C, style=customC, caption="A Parallel Sum with Omp", label=cParOMPSum]{./code_example/c_omp/parallel_sum.c}
+
+\subsubsection{Erlang Implementations}
+
+\lstinputlisting[style=customErlang, caption="Sequential Sum in Erlang", label=erlangSumSeq]{./code_example/erlang/sequential_sum.erl}
+\lstinputlisting[style=customErlang, caption="Concurrent Sum in Erlang", label=erlangSumPar]{./code_example/erlang/concurrent_sum.erl}
+
+\subsubsection{Golang Implementations}
+
+\lstinputlisting[style=customGo, caption="Parallel and Concurrent Sum in Go", label=goFull]{./code_example/go/golang.go}
+
+\subsubsection{Chapel Implementations}
+
+\lstinputlisting[style=customChpl, caption="Example of Chapel Sequential Sum", label=chplSeqSum]{./code_example/chpl/sequential_sum.chpl}
+\lstinputlisting[style=customChpl, caption="Example of Chapel ParallelSum", label=chplParSum]{./code_example/chpl/sequential_sum.chpl}
+
+
+\begin{comment}
+    Probably will not do anything with this actually.
+
+    \subsection{Event-driven and Hardware Description}
+    \subsubsection{VHDL}
+    Source: www.eecs.berkeley.edu/Pubs/TechRpts/1998/ERL-98-45.pdf
+
+    Source: http://ftp.utcluj.ro/pub/users/calceng/SSC/Ssc06/SSC06-e.pdf
+
+    VHDL has two domains that are included in its description. The first is the sequential domain and the second is a concurrent domain.
+\end{comment}
+
+\newpage
+
+\bibliographystyle{ieeetr}
+\bibliography{general_outline}
+
+
+\end{document}
