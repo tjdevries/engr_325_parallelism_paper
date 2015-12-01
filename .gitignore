@@ -1,0 +1,7 @@
+*.log
+*.aux
+*.bbl
+*.aux
+*.project.vim
+*.blg
+*.toc
