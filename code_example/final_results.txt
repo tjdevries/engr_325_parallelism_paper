@@ -1,0 +1,18 @@
+================================================================================
+                      Final Results, N = 1000000000
+================================================================================
+C with MPI Results: 
+NumProc: 1, Time: 5.374006, Sum: 499999999500000000
+NumProc: 2, Time: 0.354150, Sum: 499999999500000000
+Golang Results:
+NumProc: 1, Time: 0.68977, Sum: 499999999500000000
+NumProc: 2, Time: 0.67285, Sum: 499999999500000000
+Chapel Results:
+NumProc: 1, Time: 7.463785, Sum: 499999999500000000
+NumProc: 2, Time: 4.231605, Sum: 499999999500000000
+OpenMP Results:
+NumProc 1, Time:  4.895306, Sum: 499999999500000000
+NumProc 1, Time:  13.0191, Sum: 302028848749388210
+Erlang Results:
+NumProc: 1, Time: 0.1753617, Sum: 499999500000
+NumProc: 2, Time: 0.4037933, Sum: 4.999995e11

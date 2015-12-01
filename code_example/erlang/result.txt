@@ -1,0 +1,3 @@
+Erlang Results:
+NumProc: 1, Time: 0.1753617, Sum: 499999500000
+NumProc: 2, Time: 0.4037933, Sum: 4.999995e11

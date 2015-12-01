@@ -1,0 +1,2 @@
+Sequential: Final sum with 1 processor  in 0.000540 seconds is: 4999950000
+Parallel  : Final sum with 2 processors in 0.012353 seconds is: 4999950000
